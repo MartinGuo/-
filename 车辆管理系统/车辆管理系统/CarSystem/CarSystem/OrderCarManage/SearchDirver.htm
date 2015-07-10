@@ -1,0 +1,134 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>司机维护列表</title>
+    <script src="../lib/jquery/jquery-1.3.2.min.js" type="text/javascript"></script>
+    <link href="../lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
+    <script src="../lib/ligerUI/js/core/base.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerDialog.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>
+     <script src="../lib/ligerUI/js/plugins/ligerResizable.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerToolBar.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var gridManage;
+        $(function () {
+            getDataByDB();
+            
+        })
+        $.post("../handle/SelectNameByUnit.ashx?" + $.param({ table: "DriStateInfo", type: "DSstate" }), function (arg) {
+            $("#select1").html(arg);
+        })
+        $.post("../handle/SelectNameByUnit.ashx?" + $.param({ table: "DriLTypeInfo", type: "DTtype" }), function (arg) {
+            $("#select2").html(arg);
+        })
+        //查询
+        function querySelect() {
+            var where = "";
+            
+            var DriLType = "";
+            if ($("#select2").val() != "1") {
+                where += " and DriLType='" + $("#select2").val() + "'";
+            }
+            var DriSex = "";
+            if ($("#select3").val() != "-请选择-") {
+                where += " and DriSex='" + $("#select3").val() + "'";
+            }
+            var GuanJian = "";
+            if ($("#select4").val() == "1") {
+                GuanJian = "DriName";
+            }
+            else {
+                GuanJian = "DriLNum"; //驾照号
+            }
+            var txt = $("#txt").val();
+            if (txt != "") {
+                where += " and " + GuanJian + " like '%" + txt + "%'";
+            }
+           
+            $.getJSON("../handle/listall.ashx?" + $.param({ table: "DriveInfo", where: " DriState='在职'" + where }), function (arg) {
+               
+                gridManage.setOptions({ data: arg });
+            })
+        }
+      
+        //数据绑定
+        function getDataByDB() {
+            gridManage = $("#mytable").ligerGrid({
+                
+                columns: [
+                    { name: "DriId", display: "主键", hide: true, width: "" },
+                    { name: "DriverNowState", display: "状态", width: "20%",
+                        render: function (row) {
+                            var html = "";
+                            if (row.DriverNowState == "在场") {
+                                html = "<span style='color:#009900;'>" + row.DriverNowState + "</span>";
+                            }
+                            else if (row.DriverNowState == "已预约") {
+                                html = "<span style='color:#FF6600;'>" + row.DriverNowState + "</span>";
+                            }
+                         
+                            return html;
+                        }
+                    },
+                    { name: "DriName", display: "姓名", width: "18%",
+                        render: function (row) {
+                            var html = "<a href='editDriver.htm?DriId=" + row.DriId + "'>" + row.DriName + "</a>";
+                            return html;
+                        }
+                    },
+                { name: "DriSex", display: "性别", width: "15%" },
+                { name: "DriPhone", display: "移动电话", width: "20%" },
+                { name: "DriLNum", display: "驾照类型", width: "15%" },
+                { name: "DriLType", display: "驾驶证编号", width: "15%" },
+               
+                ],
+                enabledEdit: true, //不能选中整行
+                url: "../handle/listall.ashx?" + $.param({ table: "DriveInfo", where: "DriState='在职'" }),
+                pageSizeOptions: [5, 10, 15],
+                pageSize: 10,
+                width: window.innerWidth-15,
+                dataAction: "local",
+                onDblClickRow: function (data, rowindex, rowobj) {
+
+                    if (data.DriverNowState == "已预约") {
+                        alert("您选择的司机已被预约,请重新选择！");
+                    }
+                    else {
+                        window.location = "OCM1.aspx?DriName=" + data.DriName;
+                    }
+
+                }
+            })
+        }
+        
+    </script>
+    <style type="text/css">
+        body{font-size:12px;font-style:inherit;}
+        a{text-decoration:none;}
+        a:visited{color:#0066CC;}
+        #tools{width:810px;font-size:14px;padding-top:5px;padding-bottom:5px;margin-top:8px;}
+        #select1
+        {
+            width: 65px;
+        }
+        #select2
+        {
+            width: 54px;
+        }
+        #select3
+        {
+            width: 59px;
+        }
+    </style>
+</head>
+<body>
+<form id="from1">
+   
+    &nbsp;&nbsp;驾照类型：<select id="select2" style=" width:80px" ></select>&nbsp;&nbsp;
+    性别：<select id="select3" style=" width:80px" ><option >-请选择-</option><option>男</option><option>女</option></select>&nbsp;&nbsp;
+    关键字：<select id="select4" style="width:80px;"><option>姓名</option><option>驾照号</option></select>&nbsp;
+    <input type="text" id="txt" style="width:120px;"/>&nbsp;<input type="button" value="查询" onclick="querySelect()" style="width:70px;"/></div>
+    <div id="mytable"></div>
+</form>
+</body>
+</html>

@@ -1,0 +1,190 @@
+﻿.rightflow
+{
+    border: 1px dotted #23432f;
+    width: 360px;
+    height: 470px;
+    float: right;
+    padding: 2px;
+    margin-bottom: 5px;
+    overflow: auto;
+}
+
+.leftuser
+{
+    border: 1px dotted #23432f;
+    width: 480px;
+    height: 470px;
+    clear: both;
+    float: left;
+    margin-bottom: 5px;
+}
+
+.rightdiv
+{
+    border: 1px dotted #23432f;
+    width: 400px;
+    height: 460px;
+    float: right;
+    margin-bottom: 5px;
+    overflow: scroll;
+}
+/*添加by Chris on rightRolediv */
+
+.leftRolediv
+{
+    border: 1px dotted #23432f;
+    width: 400px;
+    height: 430px;
+    clear: both;
+    float: left;
+    margin-bottom: 5px;
+}
+
+.leftdiv
+{
+    border: 1px dotted #23432f;
+    width: 480px;
+    height: 460px;
+    clear: both;
+    float: left;
+    margin-bottom: 5px;
+}
+
+.oprightdiv
+{
+    border: 0;
+    width: 49.5%;
+    height: 490px;
+    float: right;
+    margin-bottom: 5px;
+}
+
+.opleftdiv
+{
+    border: 0;
+    width: 49%;
+    height: 490px;
+    clear: both;
+    float: left;
+    margin-bottom: 5px;
+}
+
+.explainDiv
+{
+    padding: 3px;
+    font-weight: bold;
+}
+
+.datacenterspanleft
+{
+    float: left;
+    height: 22px;
+    line-height: 25px;
+    width: 100%;
+    background: url('../images/ui/itemtitle.gif') repeat-x;
+}
+
+.datacenterspanright
+{
+    float: right;
+    height: 22px;
+    line-height: 25px;
+    width: 100%;
+    background: url('../images/ui/itemtitle.gif') repeat-x;
+}
+
+.datacenterspancomm
+{
+    float: left;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+
+.indexdivdefault
+{
+    text-align: center;
+    width: 100%;
+    cursor: default;
+}
+
+    .indexdivdefault .hometitle
+    {
+        text-decoration: none;
+        width: 50%;
+        cursor: pointer;
+        min-width: 80px;
+        display: inline;
+    }
+
+    .indexdivdefault .innermailtitle
+    {
+        text-decoration: none;
+        width: 50%;
+        cursor: pointer;
+        min-width: 80px;
+    }
+
+
+.td_leftbutton
+{
+    width: 22%;
+    text-align: left;
+    padding-left: 40px;
+    border-top: 0px solid #DDEEDD;
+    height: 30px;
+    margin-bottom: 2px;
+    margin-top: 4px;
+    width: 80px;
+    overflow: hidden;
+    padding-top: 6px;
+    position: relative;
+    margin-right: 50px;
+}
+
+.td_leftFirst
+{
+    width: 25%;
+    text-align: left;
+    padding-left: 15px;
+}
+
+.td_rightFirst
+{
+    width: 40%;
+    text-align: left;
+}
+
+.td_left
+{
+    width: 25%;
+    text-align: right;
+    padding-left: 15px;
+    padding-top: 10px;
+}
+
+.td_right
+{
+    width: 22%;
+    text-align: left;
+    padding-left: 15px;
+    padding-top: 10px;
+}
+
+.td_empty
+{
+    width: 15%;
+    text-align: left;
+}
+
+.l-textarea
+{
+    height: 50px;
+    margin: 0;
+    width: 99%;
+}
+
+body
+{
+    margin: 0 auto;
+}

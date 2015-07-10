@@ -1,0 +1,48 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Data;
+using System.Data.SqlClient;
+//using Newtonsoft.Json;
+namespace CarSystem.handle
+{
+    /// <summary>
+    /// SelectNameByUnit 的摘要说明
+    /// </summary>
+    public class SelectNameByUnit : IHttpHandler
+    {
+
+        public void ProcessRequest(HttpContext context)
+        {
+            context.Response.ContentType = "text/plain";
+            string type = context.Request["type"];
+            string table = context.Request["table"];
+            //if (string.IsNullOrEmpty(table) && string.IsNullOrEmpty(table))
+            //{
+                string sql = "select " + type + " from " + table;
+                SqlDataReader sdr = SqlHelper.ExecReader(sql, CommandType.Text);
+                string html = "<option>-请选择-</option>";
+                while (sdr.Read())
+                {
+                    html += " <option value='" + sdr[type].ToString() + "'>" + sdr[type].ToString() + "</option>";
+
+                }
+                sdr.Close();
+                context.Response.Write(html);
+          
+
+    }
+
+        
+
+
+        public bool IsReusable
+        {
+            get
+            {
+                return false;
+            }
+        }
+    }
+}

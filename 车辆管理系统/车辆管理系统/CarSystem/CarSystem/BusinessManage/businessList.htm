@@ -1,0 +1,229 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="../lib/jquery/jquery-1.3.2.min.js" type="text/javascript"></script>
+    <link href="../lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
+    <link href="../lib/ligerUI/skins/ligerui-icons.css" rel="stylesheet" />
+    <script src="../lib/ligerUI/js/ligerui.min.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerResizable.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerToolBar.js" type="text/javascript"></script>
+    <script src="../lib/Custom/common1.js"type="text/javascript"></script>
+    <script src="../lib/json2.js" type="text/javascript"></script>
+    <script src="../My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+ 
+    <script type="text/javascript">
+        var gridManage;
+        $(function () {
+            getData();
+            setTools();
+        })
+        function getData() {
+            gridManage = $("#grid").ligerGrid({
+            checkbox: true,
+                columns: [
+            { name: "rownum", display: "顺序号", width: "10%" },
+            { name: "OJNum", display: "出差单号", width: "15%" },
+            { name: "StartTime", display: "出差开始时间", width: "15%", type: "date" },
+            { name: "EndTime", display: "出差结束日期", width: "15%", type: "date" },
+            { name: "OATravel", display: "出差行程", width: "14%" },
+            { name: "OPeople", display: "出差人员", width: "15%" },
+            { name: "OutMsg", display: "出差事由", width: "14%" }
+            ],
+                url: "../handle/SelRow.ashx?" + $.param({table: "OutApplyInfo" }),
+                pageSizeOptions: [5, 10, 15],
+                pageSize: 5,
+                width: window.innerWidth,
+                dateFormat: 'yyyy-MM-dd',
+                dataAction: "local",
+                isChecked: f_isChecked,
+                onCheckRow: f_onCheckRow,
+                onCheckAllRow: f_onCheckAllRow,
+                onDblClickRow: function (data, rowindex, rowobj) {
+                    openBusInfo(data.OAId);
+                } 
+
+            })
+        }
+     function openBusInfo(OAId){
+                op = {
+                    width: 820, height: 420, title: "出差信息维护--申请详情",
+                    url: "../BusinessManage/BusInfo.htm?id="+OAId,
+                    modal: true,
+                    name: "BusInfo",
+                }
+                openInfoWindow = $.ligerDialog.open(op);
+        }
+        function f_onCheckAllRow(checked) {
+            for (var rowid in this.records)
+            {
+                if(checked)
+                    addCheckedBus(this.records[rowid]['OAId']);
+                else
+                    removeCheckedBus(this.records[rowid]['OAId']);
+            }
+        }
+        var checkedBus = [];
+        function findCheckedBus(OAId)
+        {
+            for(var i =0;i<checkedBus.length;i++)
+            {
+                if(checkedBus[i] == OAId) return i;
+            }
+            return -1;
+        }
+        function addCheckedBus(OAId)
+        {
+            if(findCheckedBus(OAId) == -1)
+                checkedBus.push(OAId);
+        }
+        function removeCheckedBus(OAId)
+        {
+            var i = findCheckedBus(OAId);
+            if(i==-1) return;
+            checkedBus.splice(i,1);
+        }
+        function f_isChecked(rowdata)
+        {
+            if (findCheckedBus(rowdata.OAId) == -1)
+                return false;
+            return true;
+        }
+        function f_onCheckRow(checked, data)
+        {
+            if (checked) addCheckedBus(data.OAId);
+            else removeCheckedBus(data.OAId);
+        }
+    function setTools() {
+        $("#tools").ligerToolBar({
+            items: [
+        { text: "申请", icon: "add", click: btn },
+        { text: "编辑", icon: "modify", click: btn },
+        {text:"删除", icon: "delete",click:btn}
+        ]
+        })
+    }
+
+    function btn(arg) {
+        if (arg.text == "申请") {
+            var option = {
+                width: 800, height:420, title: "出差申请",
+                url: "bussinessOrder.htm", name: "bussinessOrderAdd",
+                buttons: [{ text: "保存", onclick: addClick }, { text: '关闭', onclick: addClick }]
+        }
+            openAddWindow = $.ligerDialog.open(option);
+        }
+        if (arg.text == "编辑") {
+            var row = gridManage.getSelectedRow();
+            if (row != null) {
+                var option = {
+                    width: 800, height: 500, title: "出差信息维护--编辑",
+                    url: "businessUpd.htm?id=" + row.OAId, name: "bussinessOrderUpd",
+                    buttons: [{ text: "更新", onclick: btnClick }, { text: '关闭', onclick: btnClick}]
+                }      
+            openAddWindow=$.ligerDialog.open(option);
+        }
+        else{
+                $.ligerDialog.error("未选择任何数据");
+            }
+        }
+        if (arg.text == "删除") {
+            var rows = gridManage.getSelectedRow();
+            if (rows != null) {
+                $.ligerDialog.confirm("你确定要删除吗？", "删除询问", function (c) {
+                    if (c) {
+                        $.post("../handle/delall.ashx?" + $.param({ ids: checkedBus, key: "OAId", table: "OutApplyInfo" }), function (i) {
+                            if (i > 0) {
+                                
+                            }
+                            
+                        })
+
+                        alert("删除成功");
+                        gridManage.loadData(); //刷新表格数据
+                    }
+                })
+            }
+             else{
+                $.ligerDialog.error("未选择任何数据");
+            }
+        }
+    }
+    function addClick(v1, v2) {
+        if (v1.text == "保存") {
+            window.frames["bussinessOrderAdd"].$("#form1").submit();
+        }
+
+        else if (v1.text == "关闭") {
+            v2.close();
+        }
+    }
+     function btnClick(v1,v2) {
+        if (v1.text == "更新") {
+            window.frames["bussinessOrderUpd"].$("#form1").submit();
+        }
+
+        else if (v1.text == "关闭") {
+            v2.close();
+        }
+    }
+    function query() {
+        var start = $("#StartTime").val();//开始
+        var end = $("#EndTime").val();//结束
+        var OJNum = $("#OJNum").val();//出差编号
+        var where = "1=1";
+        end = end.replace(/-/g, "-");
+        var date = new Date(end);
+       // alert(start);
+        if (OJNum != null && OJNum != "") 
+        {
+            where += "and OJNum like '%" + OJNum + "%'";
+        }
+        if (start != null && start != "")
+         {
+             where += "and (select DATEDIFF(day,'" + start + "',StartTime) AS DiffDate)>=0"; 
+        }
+        if(end != null && end !='')
+        {
+            where += "and (select DATEDIFF(day,EndTime,'" + end + "') AS DiffDate)>=0";
+        }
+           // alert(where);
+            $.getJSON("../handle/listall.ashx?" + $.param({ rd: Math.random(), table: "OutApplyInfo", where: where }), function (arg) {
+                gridManage.setOptions({ data: arg })
+            })
+    }
+     function ck() {
+            var data1 = $("#StartTime").val();
+            var data2 = $("#EndTime").val();
+            if (data1>= data2) {
+                alert("结束日期不能早于开始日期");
+                $(":input[name='EndTime']").val("");
+            }
+        }
+    </script>
+    <style type="text/css">
+   .s1
+    {
+
+        background-color:#DBEFF8;
+        }
+    </style>
+
+</head>
+<body>
+<form method="post" id="form1">
+    <table class="s1">
+        <tr>
+            <td>
+            出差单号：<input type="text" class="t2" id="OJNum" name="OJNum"/></td>
+            <td> 出差时间从：<input type="text" name="StartTime" id="StartTime" class="t2" onclick="WdatePicker()" value=""/></td>
+            <td> &nbsp;&nbsp; 至&nbsp;&nbsp; <input type="text" name="EndTime" id="EndTime" class="t2" onclick="WdatePicker()" onchange="ck()"/></td>
+            <td><input type="button" class="s1" value="查询" style="width:80px" onclick="query()"/></td>        
+        </tr>
+    </table>
+</form>
+    <div id="tools"></div>
+    <div id="grid"></div>
+</body>
+</html>

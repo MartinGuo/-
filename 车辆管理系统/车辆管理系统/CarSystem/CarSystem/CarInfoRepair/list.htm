@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>汽车管理系统</title>
+    <script src="../lib/jquery/jquery-1.3.2.min.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/ligerui.min.js" type="text/javascript"></script>
+    <link href="../lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
+    <script src="../lib/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerResizable.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerDialog.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerDrag.js" type="text/javascript"></script>
+    <link href="../lib/ligerUI/skins/ligerui-icons.css" rel="stylesheet" type="text/css" />
+    <script src="../lib/ligerUI/js/plugins/ligerToolBar.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var gridManage;
+        var openAddWindow;
+        $(function () {
+            setToolBar();
+            getDataByDB();
+             $.post("../handle/SelectNameByUnit.ashx?" + $.param({ "table": "CarTypeInfo", "type": "CarType", rd: Math.random() }), function (arg) {
+                $("#CarType").html(arg);
+            })
+            $.post("../handle/SelectNameByUnit.ashx?" + $.param({ "table": "CarUseInfo", "type": "CarUse", rd: Math.random() }), function (arg) {
+                $("#CarUse").html(arg);
+            })
+            $.post("../handle/SelectNameByUnit.ashx?" + $.param({ "table": "CarStateInfo", "type": "CarState", rd: Math.random() }), function (arg) {
+                $("#CarState").html(arg);
+            })
+        })
+        function setToolBar() {
+            $("#tools").ligerToolBar({  //导航栏
+                items: [
+                     { text: "新车登记", icon: "add", click: myclick },
+                     { text: "删除", icon: "delete", click: myclick },
+                     { text: "损坏", icon: "modify", click: myclick },
+                     { text: "维修", icon: "modify", click: myclick },
+                     { text: "报废", icon: "modify", click: myclick },
+                     { text: "可用", icon: "modify", click: myclick },
+                     { text: "编辑", icon: "modify", click: myclick }
+                ]
+            })
+        }
+        function myclick(arg) {
+          if (arg.text == "新车登记") {
+                op = {
+                    width: 750, height: 450, title: "车辆信息维护--新车登记",
+                    url: "../add.htm",
+                    modal: true,
+                    name: "CarAdd",
+                }
+                openAddWindow = $.ligerDialog.open(op);
+            
+            }
+            else if (arg.text == "损坏" || arg.text == "维修" || arg.text == "报废"|| arg.text == "删除" ||arg.text == "可用"||arg.text == "编辑") {
+                var v1 = gridManage.getCheckedRows(); //得到选择的行
+                
+                if (v1 != "") {
+                         if(arg.text=="删除"){
+                         $.ligerDialog.confirm("你确定要删除吗？", "删除询问", function (c) {
+                             if (c) {
+                                  $.post("../handle/delall.ashx?" + $.param({ "ids":checkedCar, key: "CarId", table: "CarInfo" }), function (i) {
+                                    
+                                    $.ligerDialog.success("删除成功",function(){
+                                            gridManage.loadData();
+                                    });
+                                     //刷新表格数据
+                                
+                            })
+                        }
+                    })
+                         }
+                          else if(arg.text == "损坏" || arg.text == "维修" || arg.text == "报废"||arg.text == "可用"){
+                                $.ligerDialog.confirm("你确定要修改吗？", "修改询问", function (c) {
+                                    if (c) {
+                                  $.post("../handle/UpdateCarInfo.ashx?" + $.param({ "ids":checkedCar, col: "CarState",value:arg.text, table: "CarInfo",id:"CarId" }), function (i) {
+                                     if (i==0) {
+                                        $.ligerDialog.success("修该成功",function(){
+                                         gridManage.loadData();
+                                        });
+                                        //刷新表格数据
+                                        }
+                                    })
+                                }
+                            })
+                         }
+                            else{     
+                            if(v1.length>1){
+                               $.ligerDialog.error("请选择一条数据进行编辑!");                    
+                                }
+                                else{ 
+                                      op = {
+                                        width: 810, height: 480, title: "车辆信息维护--编辑",
+                                        url: "../add.htm?id="+v1[0].CarId+"&flag=edit",
+                                        modal: true,
+                                        name: "editAddInfo",
+                                            }
+                                     openAddWindow = $.ligerDialog.open(op);
+                            }
+                          }
+                    }else{
+                      $.ligerDialog.error("您未选择需要操作的数据");
+                    } 
+                }
+                }
+                
+            
+//            else if (arg.text == "查看") {
+//                var v1 = gridManage.getSelectedRow(); //得到选择的行
+//                if (v1 != null) {
+//                    openAddWindow = $.ligerDialog.open({
+//                        width: window.innerWidth,
+//                        height: window.innerHeight - 20,
+//                        title: "租房信息管理--查看",
+//                        url: "HouseLook.htm?" + $.param({ table: "Fouse", "id": v1.id }),
+//                        name: "houseLook"
+//                    })
+//                }
+//            }
+//       }
+        function btnClick(v1, v2) {//v1:按钮 v2:窗体
+            if (v1.text == "查询") {//查询
+                var title = window.frames["houseQuery"].$("#title").val(); //得到另一个页面的值
+                var area = window.frames["houseQuery"].$("#getTypeArea").val();
+                var where = ""; var where1 = "";
+                where1 = "title like '%" + title + "%'";
+                var where2 = "area ='" + area + "'";
+                if (title != "" && area != "")
+                    where = where1 + " and " + where2
+                else {
+                    if (area != "") {
+                        where = where2;
+                    }
+                    else if (title != "")
+                        where = where1;
+                }
+                $.getJSON("../handle/Query.ashx?" + $.param({ rd: Math.random(), table: "Fouse", "where": where }), function (arg) {
+                    gridManage.setOptions({ data: arg });
+                })
+                v2.close(); //关闭窗体
+            }
+            else if (v1.text == "取消") {
+                v2.close();
+            }
+        }
+        function getDataByDB() {
+            gridManage = $("#mytable").ligerGrid({
+                checkbox: true,
+                columns: [
+                    { name: "CarId", display: "ID",hide:true, },
+                    { name: "CarState", display: "状态", width: "8%" ,render: function (item) {
+                                                var sdown = "";
+                                                if (item.CarState == "可用") {
+                                                    sdown = "<font style='color:green'>可用</font>";
+                                                }
+                                                else if (item.CarState == "损坏") {
+                                                    sdown = "<font style='color:red'>损坏</font>";
+                                                }
+                                                else if (item.CarState == "报废") {
+                                                    sdown = "<font style='color:red'>报废</font>";
+                                                }
+                                                else if (item.CarState == "维修") {
+                                                    sdown = "<font style='color:yellow'>维修中...</font>";
+                                                }
+                                                return sdown;
+                                            }
+                                            }, 
+                    { name: "CarNum", display: "车牌号", width: "13%" },
+                    { name: "LabelNum", display: "厂牌型号", width: "13%" },
+                    { name: "CarColor", display: "颜色", width: "13%" },
+                    { name: "CarType", display: "车型", width: "13%" },
+                    { name: "CarSeat", display: "座位数", width: "13%" },
+                    { name: "CarUse", display: "用途", width: "12%" },
+                    { name: "CarUpdate", display: "更新时间", width: "13%", type: 'date' }
+                    ],
+                    
+                    url: "../handle/listall.ashx?" + $.param({ table: "CarInfo" }),
+                    pageSizeOptions: [5, 10, 15],
+                    pageSize: 5,
+                    width: window.innerWidth,
+                    dataAction: "local",
+                    isChecked: f_isChecked, 
+                    onCheckRow: f_onCheckRow, 
+                    onCheckAllRow: f_onCheckAllRow,
+                    onDblClickRow : function (data, rowindex, rowobj)
+                    {
+                        openCarInfo(data.CarId);
+                    } 
+            })
+        }
+        function openCarInfo(carId){
+                op = {
+                    width: 710, height: 450, title: "车辆信息维护--车辆详情",
+                    url: "../carInfo.htm?id="+carId,
+                    modal: true,
+                    name: "CarInfo",
+                }
+                openAddWindow = $.ligerDialog.open(op);
+        }
+        function f_onCheckAllRow(checked) {
+            for (var rowid in this.records)
+            {
+                if(checked)
+                    addCheckedCar(this.records[rowid]['CarId']);
+                else
+                    removeCheckedCar(this.records[rowid]['CarId']);
+            }
+        }
+        var checkedCar = [];
+        function findCheckedCar(CarId)
+        {
+            for(var i =0;i<checkedCar.length;i++)
+            {
+                if(checkedCar[i] == CarId) return i;
+            }
+            return -1;
+        }
+        function addCheckedCar(CarId)
+        {
+            if(findCheckedCar(CarId) == -1)
+                checkedCar.push(CarId);
+        }
+        function removeCheckedCar(CarId)
+        {
+            var i = findCheckedCar(CarId);
+            if(i==-1) return;
+            checkedCar.splice(i,1);
+        }
+        function f_isChecked(rowdata)
+        {
+            if (findCheckedCar(rowdata.CarId) == -1)
+                return false;
+            return true;
+        }
+        function f_onCheckRow(checked, data)
+        {
+            if (checked) addCheckedCar(data.CarId);
+            else removeCheckedCar(data.CarId);
+        }
+        function selectByAll(){
+         var Type = $("#CarType").attr("value");
+         var CarType="";
+         if(Type=='1'){CarType = "null"; }else {CarType = "'"+Type+"'"}
+         var Use = $("#CarUse").attr("value");
+         var CarUse="";
+         if(Use=='1'){CarUse = "null"; }else {CarUse = "'"+Use+"'"}
+         var State = $("#CarState").attr("value");
+         var CarState="";
+         if(State=='1'){CarState = "null"; }else {CarState = "'"+State+"'"}
+         var Num = document.getElementById("CarNum").value;
+         var CarNum="";
+         if(Num==''){CarNum = "null"; }else {CarNum = "'%"+Num+"%'"}
+         var sql = " CarUse=isnull("+CarUse+",CarUse) and CarType=isnull("+CarType+",CarType) and CarState=isnull("+CarState+",CarState) and CarNum like isnull("+CarNum+",CarNum)";  
+             $.getJSON("../handle/listall.ashx?" + $.param({ rd: Math.random(),table:"CarInfo", where:sql}), function (arg) {
+                    gridManage.setOptions({ data: arg });
+                })
+        }
+    </script>
+    <style type="text/css">
+     .s1
+    {
+
+        background-color:#DBEFF8;
+    }
+    </style>
+</head>
+<body>
+<table style=" height:15px; width: auto" class="s1">
+<tr>
+ <td style="float:right;" ><font class="gray"> &nbsp;&nbsp;车型：</font></td>
+ <td><select class="t1" id="CarType" name = "CarType" style=" width:100px"></select></td>
+ <td style="float:right" ><font class="gray">&nbsp;&nbsp; 用途：</font></td>
+ <td><select class="t1" id="CarUse"  name="CarUse" style=" width:100px"></select></td>
+ <td style="float:right" ><font class="gray"> &nbsp;&nbsp;状态：</font></td>
+ <td><select class="t1" id="CarState" name="CarState" style=" width:100px"></select></td>
+ <td style="float:right"><font class="gray"> &nbsp;&nbsp;车辆牌号：</font></td>
+ <td><input type="text" name="CarNum" id="CarNum"  style=" width:150px"/></td>
+ <td><input  type="submit" class="s1" value="查询" style="width:80px"  onclick="selectByAll();" /></td>     
+</tr>
+</table>
+    <div id="tools"></div>
+    <div id="mytable"></div>
+</body>
+</html>

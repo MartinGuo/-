@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+        <script src="../lib/jquery/jquery-1.3.2.min.js" type="text/javascript"></script>
+    <link href="../lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
+    <script src="../lib/ligerUI/js/core/base.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerDialog.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>
+     <script src="../lib/ligerUI/js/plugins/ligerResizable.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerToolBar.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    var gridManage;
+    var  openAddWindow;
+    $(function () {
+
+            getDataByDB();
+          
+        })
+    function getDataByDB() {
+            gridManage=$("#mytable").ligerGrid({
+               
+                columns: [
+                    { name: "DriId", display: "主键", hide: true, width: "" },
+                    { name: "CarNowState", display: "当前状态", width: "20%",
+                        render: function (row) {
+                            var html = "";
+                            if (row.CarNowState == "已返回") {
+                                html = "<span style='color:#009900;'>" + row.CarNowState + "</span>";
+                            }
+                            else if (row.CarNowState == "未返回") {
+                                html = "<span style='color:#FF6600;'>" + row.CarNowState + "</span>";
+                            }
+                            
+                            return html;
+                        }
+                    },
+
+                    { name: "CarNum", display: "车牌", width: "20%",
+//                        render: function (row) {
+//                            var html = "<a href='editDriver.htm?DriId=" + row.DriId + "'>" + row.DriName + "</a>";
+//                            return html;
+//                        }
+                    },
+                { name: "EndUse", display: "后期最近一次安排", width: "60%", type: 'date' },
+               
+                ],
+                enabledEdit :true,//不能选中整行
+                url: "../handle/listall.ashx?" + $.param({ table: "view_OCM", where: "" }),
+                pageSizeOptions: [5, 10, 15],
+                pageSize: 10,
+                width: window.innerWidth,
+                dataAction: "local",
+                 onDblClickRow: function (data, rowindex, rowobj) {
+                    op = {
+                        width: 750, height: 500, title: "用车预约填报",
+                        url: "OCM1.aspx",
+                        modal: true,
+                        name: "OCM"
+                    }
+                    openAddWindow = $.ligerDialog.open(op);
+            }
+})}
+
+function searchC()
+{
+
+var  search  = $("#Car").val();
+var where ="";
+if (search != "" ) {
+ where = "CarNum like '%"+search+"%'";
+
+}
+$.getJSON("../handle/listall.ashx?" + $.param({  table:"view_OCM", where: where }), function (arg) {
+         
+                gridManage.setOptions({ data: arg });
+                }
+
+)}
+
+       
+    </script>
+</head>
+<body>
+车牌:<input type="text" id="Car" /> <input type="button"  value="查询"  onclick="searchC()"/>
+<div id=""></div>
+   <div id="mytable"></div>
+</body>
+</html>

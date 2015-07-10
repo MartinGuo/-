@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+        <link href="../lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
+    <script src="../lib/jquery/jquery-1.3.2.min.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/core/base.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerButton.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>
+     <script src="../lib/ligerUI/js/plugins/ligerResizable.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerDialog.js" type="text/javascript"></script>
+    <script src="../lib/ligerUI/js/plugins/ligerDrag.js" type="text/javascript"></script>
+    <script src="../lib/jquery.form.js" type="text/javascript"></script>
+    <script src="../lib/json2.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        var gridManage;
+        var openAddWindow;
+        $(function () {
+            getDataByDB();
+        })
+       function getData() {
+            var id = $("#txt").val();
+                    var sql = "id=isnull("+ id+ ",id)";
+                   // alert(sql);
+                    $.getJSON("../handle/listall.ashx?" + $.param({ rd: Math.random(), table: "ReturnCarInfo", where: sql }), function (arg) {
+                        gridManage.setOptions({ data: arg });
+                    })
+                }
+       function jsonDateFormat(jsonDate) {//json日期格式转换为正常格式
+            try {
+                var date = new Date(parseInt(jsonDate.replace("/Date(", "").replace(")/", ""), 10));
+                var month = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+                var day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+                var hours = date.getHours();
+                var minutes = date.getMinutes();
+                var seconds = date.getSeconds();
+                var milliseconds = date.getMilliseconds();
+                return date.getFullYear() + "-" + month + "-" + day + " ";
+            } catch (ex) {
+                return "";
+            }
+        }
+       function getDataByDB() {
+            gridManage=$("#mytable").ligerGrid({
+                columns: [
+                    { name: "OJNum", display: "主键", hide: true, width: "" },
+                    { name: "DriId", display: "主键", hide: true, width: "" },
+                    { name: "CarNowState", display: "状态", width: "10%",
+                        render: function (row) {
+                            var html = "";
+                            if (row.CarNowState == "已返回") {
+                                html = "<span style='color:green;'>" + row.CarNowState + "</span>";
+                            }
+                            else if (row.CarNowState == "未返回") {
+                                html = "<span style='color:red'>" + row.CarNowState + "</span>";
+                            }
+                            return html;
+                        }
+                    },
+                { name: "CarNum", display: "车牌号", width: "15%" },
+                { name: "LabelNum", display: "厂牌型号", width: "10%" },
+                { name: "CarColor", display: "颜色", width: "10%" },
+                { name: "EndTime", display: "预约返回时间", width: "10%", type: "date" },
+                { name: "ActRetTime", display: "实际返回时间", width: "15%", type: "date",
+                    render: function (row) {
+                        var showtime = "";
+                        if (row.ActRetTime == "/Date(-2209017600000+0800)/") {
+                            showtime = "";
+                        }
+                        else
+                            showtime =jsonDateFormat(row.ActRetTime);
+                        return showtime;
+                    }
+                },
+                { name: "DriName", display: "司机", width: "15%" },
+                { name: "OCName", display: "申请人", width: "15%" }
+                ],
+                url: "../handle/listall.ashx?" + $.param({ table: "view_ReturnCar" }),
+                pageSizeOptions: [5, 10, 15],
+                pageSize: 5,
+                dateFormat: "yyyy-MM-dd",
+                width: window.innerWidth,
+                dataAction: "local",
+                onDblClickRow: function (data, rowindex, rowobj) {
+
+                    if (data.CarNowState == "已返回") {
+                        $.ligerDialog.error("该车辆已经返回！");
+                    }
+                    else {
+                        op = {
+                            width: 710, height: 300, title: "车辆返回登记页面",
+                            url: "bcr.htm?CarNum=" + data.CarNum + "&OJNum=" + data.OJNum + "&DriId=" + data.DriId,
+                            modal: true,
+                            name: "CarNum"
+                        }
+                        openAddWindow = $.ligerDialog.open(op);
+                    }
+
+                }
+            })
+        }
+
+    </script>
+    <style type="text/css">
+        body{font-size:12px;font-style:inherit;}
+        a{text-decoration:none;}
+        a:visited{color:#0066CC;}
+        #select1
+        {
+            width: 65px;
+        }
+        #select2
+        {
+            width: 54px;
+        }
+        #select3
+        {
+            width: 59px;
+        }
+    </style>
+</head>
+<body>
+   <!-- <div style="margin-left:20px;margin-top:30px;">
+       -->
+  车牌号： <input  type="text" id="txt" />
+<input type="button" value="查询" onclick="getData()" style="width:70px;"/>
+
+
+    <div id="mytable"></div>
+</body>
+</html>

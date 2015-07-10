@@ -1,0 +1,441 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Configuration;
+using System.Data.SqlClient;
+using System.Data;
+public class SqlHelper
+{    //得到数据库的配置信息
+    public static string connectionString = ConfigurationManager.AppSettings["connStr"].ToString();
+    /// <summary>
+    /// 执行查询语句，返回SqlDataReader
+    /// </summary>
+    /// <param name="cmdText">Sql语句</param>
+    /// <returns></returns>
+    public static SqlDataReader ExecReader(string strSql)
+    {
+        SqlConnection conn = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand(strSql, conn);
+        try
+        {
+            conn.Open();
+            return cmd.ExecuteReader(CommandBehavior.CloseConnection);
+        }
+        catch
+        {
+            conn.Close();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// 执行查询语句，返回SqlDataReader
+    /// </summary>
+    /// <param name="cmdText">Sql语句</param>
+    /// <param name="paras">传递的参数数组</param>
+    /// <returns></returns>
+    public static SqlDataReader ExecReader(string cmdText, SqlParameter[] paras)
+    {
+        SqlConnection conn = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand(cmdText, conn);
+        cmd.Parameters.AddRange(paras);
+        try
+        {
+            conn.Open();
+            return cmd.ExecuteReader(CommandBehavior.CloseConnection);
+        }
+        catch
+        {
+            conn.Close();
+            throw;
+        }
+    }
+    /// <summary>
+    /// 执行查询语句，返回SqlDataReader
+    /// </summary>
+    /// <param name="cmdText">sql语句</param>
+    /// <param name="para">参数</param>
+    /// <returns></returns>
+    public static SqlDataReader ExecReader(string cmdText, SqlParameter para)
+    {
+        SqlConnection conn = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand(cmdText, conn);
+        cmd.Parameters.Add(para);
+        try
+        {
+            conn.Open();
+            return cmd.ExecuteReader(CommandBehavior.CloseConnection);
+        }
+        catch
+        {
+            conn.Close();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// 执行查询语句，返回SqlDataReader
+    /// </summary>
+    /// <param name="cmdText">Sql语句</param>
+    /// <param name="ct">命令类型</param>
+    /// <param name="paras">参数数组</param>
+    /// <returns></returns>
+    public static SqlDataReader ExecReader(string cmdText, CommandType ct, SqlParameter[] paras)
+    {
+        SqlConnection conn = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand(cmdText, conn);
+        cmd.CommandType = ct;
+        foreach (SqlParameter para in paras)
+        {
+            cmd.Parameters.Add(para);
+        }
+        try
+        {
+            conn.Open();
+            return cmd.ExecuteReader(CommandBehavior.CloseConnection);
+        }
+        catch
+        {
+            conn.Close();
+            throw;
+        }
+    }
+    /// <summary>
+    /// 执行查询语句，返回SqlDataReader
+    /// </summary>
+    /// <param name="cmdText"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public static SqlDataReader ExecReader(string cmdText, CommandType ct)
+    {
+        SqlConnection conn = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand(cmdText, conn);
+        cmd.CommandType = ct;
+        try
+        {
+            conn.Open();
+            return cmd.ExecuteReader(CommandBehavior.CloseConnection);
+        }
+        catch
+        {
+            conn.Close();
+            throw;
+        }
+    }
+    /// <summary>
+    /// 执行非查询语句，返回整数
+    /// </summary>
+    /// <param name="cmdText">Sql语句</param>
+    /// <returns>返回值>0时，更新成功，否则失败</returns>
+    public static int ExecNonQuery(string strSql)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            SqlCommand cmd = new SqlCommand(strSql, conn);
+            try
+            {
+                conn.Open();
+                int i = cmd.ExecuteNonQuery();
+                return i;
+            }
+            catch
+            {
+                conn.Close();
+                return 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 执行非查询语句，返回整数
+    /// </summary>
+    /// <param name="cmdText">Sql语句</param>
+    /// <param name="paras">传递的参数数组</param>
+    /// <returns>返回值>0时，更新成功，否则失败</returns>
+    public static int ExecNonQuery(string cmdText, SqlParameter[] paras)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            SqlCommand cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.AddRange(paras);
+            try
+            {
+                conn.Open();
+                int i = cmd.ExecuteNonQuery();
+                return i;
+            }
+            catch
+            {
+                conn.Close();
+                return 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 执行非查询语句，返回整数
+    /// </summary>
+    /// <param name="cmdText">Sql语句</param>
+    /// <param name="paras">传递的参数数组</param>
+    /// <returns>返回值>0时，更新成功，否则失败</returns>
+    public static int ExecNonQuery(string cmdText, SqlParameter sp)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            SqlCommand cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.Add(sp);
+            try
+            {
+                conn.Open();
+                int i = cmd.ExecuteNonQuery();
+                return i;
+            }
+            catch
+            {
+                conn.Close();
+                return 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 执行非查询语句，返回整数
+    /// </summary>
+    /// <param name="cmdText">Sql语句</param>
+    /// <param name="ct">命令类型</param>
+    /// <param name="paras">参数数组</param>
+    /// <returns>返回值>0时，更新成功，否则失败</returns>
+    public static int ExecNonQuery(string cmdText, CommandType ct, SqlParameter[] paras)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            SqlCommand cmd = new SqlCommand(cmdText, conn);
+            cmd.CommandType = ct;
+            foreach (SqlParameter para in paras)
+            {
+                cmd.Parameters.Add(para);
+            }
+            try
+            {
+                conn.Open();
+                int i = cmd.ExecuteNonQuery();
+                return i;
+            }
+            catch
+            {
+                conn.Close();
+                return 0;
+            }
+        }
+    }
+    /// <summary>
+    /// 执行非查询语句，返回整数
+    /// </summary>
+    /// <param name="cmdText">sql语句</param>
+    /// <param name="ct">参数类型</param>
+    /// <returns>返回值>0时，更新成功，否则失败</returns>
+    public static int ExecNonQuery(string cmdText, CommandType ct)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            SqlCommand cmd = new SqlCommand(cmdText, conn);
+            cmd.CommandType = ct;
+            try
+            {
+                conn.Open();
+                int i = cmd.ExecuteNonQuery();
+                return i;
+            }
+            catch
+            {
+                conn.Close();
+                return 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 执行查询语句，返回第一行第一列的值
+    /// </summary>
+    /// <param name="cmdText">Sql语句</param>
+    /// <returns>返回值null，更新失败，否则成功完成</returns>
+    public static object ExecScalar(string strSql)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            SqlCommand cmd = new SqlCommand(strSql, conn);
+            try
+            {
+                conn.Open();
+                object ob = cmd.ExecuteScalar();
+                return ob;
+            }
+            catch
+            {
+                conn.Close();
+                return null;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 执行查询语句，返回第一行第一列的值
+    /// </summary>
+    /// <param name="cmdText">Sql语句</param>
+    /// <param name="paras">传递的参数数组</param>
+    /// <returns>返回值null，更新失败，否则成功完成</returns>
+    public static object ExecScalar(string cmdText, SqlParameter[] paras)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            SqlCommand cmd = new SqlCommand(cmdText, conn);
+            cmd.Parameters.AddRange(paras);
+            try
+            {
+                conn.Open();
+                object ob = cmd.ExecuteScalar();
+                return ob;
+            }
+            catch
+            {
+                conn.Close();
+                return 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 执行查询语句，返回第一行第一列的值
+    /// </summary>
+    /// <param name="cmdText">Sql语句</param>
+    /// <param name="ct">命令类型</param>
+    /// <param name="paras">参数数组</param>
+    /// <returns>返回值null，更新失败，否则成功完成</returns>
+    public static object ExecScalar(string cmdText, CommandType ct, SqlParameter[] paras)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            SqlCommand cmd = new SqlCommand(cmdText, conn);
+            cmd.CommandType = ct;
+            foreach (SqlParameter para in paras)
+            {
+                cmd.Parameters.Add(para);
+            }
+            try
+            {
+                conn.Open();
+                object ob = cmd.ExecuteScalar();
+                return ob;
+            }
+            catch
+            {
+                conn.Close();
+                return 0;
+            }
+        }
+    }
+    /// <summary>
+    /// 执行查询语句，返回第一行第一列的值
+    /// </summary>
+    /// <param name="cmdText">sql语句</param>
+    /// <param name="ct">参数类型</param>
+    /// <returns>返回值null，更新失败，否则成功完成</returns>
+    public static object ExecScalar(string cmdText, CommandType ct)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            SqlCommand cmd = new SqlCommand(cmdText, conn);
+            cmd.CommandType = ct;
+            try
+            {
+                conn.Open();
+                object ob = cmd.ExecuteScalar();
+                return ob;
+            }
+            catch
+            {
+                conn.Close();
+                return 0;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 执行事务
+    /// </summary>
+    /// <param name="mainSql">对主表执行的相关操作</param>
+    /// <param name="sqlsReleated">对与主表相关的表的操作</param>
+    /// <returns></returns>
+    public static int ExecTrans(string mainSql, List<string> sqlsReleated)
+    {
+        SqlConnection conn = new SqlConnection(connectionString);
+        conn.Open();
+        SqlTransaction trans = conn.BeginTransaction();
+        SqlCommand cmd = new SqlCommand();
+        cmd.Connection = conn;
+        cmd.Transaction = trans;
+        try
+        {
+            cmd.CommandText = mainSql;
+            cmd.ExecuteNonQuery();
+
+            foreach (string strsql in sqlsReleated)
+            {
+                cmd.CommandText = strsql;
+                cmd.ExecuteNonQuery();
+            }
+
+            trans.Commit();
+            return 1;
+        }
+        catch
+        {
+            trans.Rollback();
+            return -1;
+        }
+        finally
+        {
+            if (conn.State == ConnectionState.Open)
+                conn.Close();
+        }
+    }
+
+    #region ExecuteDataTable
+    public static DataTable ExecuteDataTable(string commandText)
+    {
+        return ExecuteDataTable(commandText, CommandType.Text, null);
+    }
+
+    public static DataTable ExecuteDataTable(string commandText, CommandType commandType)
+    {
+        return ExecuteDataTable(commandText, commandType, null);
+    }
+
+    public static DataTable ExecuteDataTable(string commandText, CommandType commandType, SqlParameter[] parameters)
+    {
+        DataTable data = new DataTable();
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            using (SqlCommand command = new SqlCommand(commandText, connection))
+            {
+                command.CommandType = commandType;
+                if (parameters != null)
+                {
+                    foreach (SqlParameter parameter in parameters)
+                    {
+                        if (parameter != null)
+                        {
+                            command.Parameters.Add(parameter);
+                        }
+                    }
+                }
+                SqlDataAdapter adapter = new SqlDataAdapter(command);
+                adapter.Fill(data);
+            }
+        }
+        return data;
+    }
+    #endregion
+}

@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>建筑工程管理系统</title>
+    <script src="lib/jquery/jquery-1.5.2.min.js" type="text/javascript"></script>
+    <link href="lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
+    <script src="lib/ligerUI/js/core/base.js" type="text/javascript"></script>
+    <script src="lib/ligerUI/js/ligerui.min.js" type="text/javascript"></script>
+    <script src="lib/ligerUI/js/plugins/ligerAccordion.js" type="text/javascript"></script>
+    <script src="lib/ligerUI/js/plugins/ligerTab.js" type="text/javascript"></script>
+    <script src="lib/ligerUI/js/plugins/ligerDialog.js" type="text/javascript"></script>
+    <script src="lib/ligerUI/js/plugins/ligerLayout.js" type="text/javascript"></script>
+    <link href="lib/css/index.css" rel="stylesheet" type="text/css" />
+    <script src="lib/json2.js" type="text/javascript"></script>
+    <script src="lib/js/LG.js" type="text/javascript"></script>
+    <script src="lib/js/common.js" type="text/javascript"></script>
+    <script src="lib/Custom/Storage.js" type="text/javascript"></script>
+    <script src="lib/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>
+    <script src="lib/js/ligerui.expand.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var mytab;
+        var win, win51, win52, win53, win41, win42, win43, win44;
+
+        var uniq = function (arr) {
+            var a = [], o = {}, i, v, len = arr.length;
+            if (len < 2) {
+                return arr;
+            }
+            for (i = 0; i < len; i++) {
+                v = arr[i];
+                if (o[v] !== 1) {
+                    a.push(v);
+                    o[v] = 1;
+                }
+            }
+            return a;
+        }
+        //添加标签
+        function addtab(id, atext, aurl) {
+           
+            if (!mytab) return;
+           
+            mytab.addTabItem({ tabid: id, text: atext, url: aurl });
+         
+        }
+        //扩展 数组去除重复项目
+        Array.prototype.uniqueArr = function () {
+            var temp = {}, len = this.length; for (var i = 0; i < len; i++) {
+                if (typeof temp[this[i]] == "undefined")
+                { temp[this[i]] = 1; }
+            } this.length = 0; len = 0; for (var i in temp) { this[len++] = i; } return this;
+        }
+        function onAfterRemove(TabID) {
+            //a1
+            var length = mytab.getTabidList('', true).length;
+            if (length <= 0) {
+                $("#showscrollPeople").show();
+            }
+           
+        }
+        function onAfterAdd() {
+            $("#showscrollPeople").hide();
+        }
+
+
+        $(function () {
+            var username = decodeURI(com.getQueryStringByName("username"));
+            var password = decodeURI(com.getQueryStringByName("password"));
+            if (username && password) {
+                var sReturn = $.ajax({
+                    url: "handle/validuser.ashx",
+                    type: "post",
+                    data: { cuser: username, cpass: password },
+                    async: false
+                });
+                var oReturn = JSON2.parse(sReturn.responseText);
+                if (oReturn.Status == 1) {
+                    $("#iTop").attr("src", "top.aspx?userid=" + username);
+                    setLoginUserCookie("Loginname", username);
+                } else {
+                    location = "login.htm";
+                }
+            }
+            else {
+                username = getCookie("Loginname");
+                //                $("#iTop").attr("src", "top.aspx");
+            }
+            this.name = "index";
+            $("#main").ligerLayout({ leftWidth: 200, topHeight: 94 })
+            mytab = $("#home").ligerTab({
+                width: "100%",
+                height: "100%",
+                contextmenu: true,
+                onAfterRemoveTabItem: onAfterRemove,  //删除tab项后事件
+                onAfterAddTabItem: onAfterAdd
+            });
+            setTree();
+          
+            var date = new Date(); //完整的系统日期
+            $("#system_date").html(date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+            var width = mytab.getTabItemCount() * 94 + 200; //inline-table
+            var maxWidth = $(window).width();
+            var dateWidth = 150;
+            $("#showscrollPeople").css("width", maxWidth - width).css("left", width).css("right", 20);
+            $("#marquee").css("width", maxWidth - width - dateWidth);
+            $(".system_date, #system_date").css("width", dateWidth);
+
+
+            //            $.post("handle/getReceived.ashx", function (sumNvalues) {
+            //                
+            //                $("#marqueeNvalue").text("应回款：" + sumNvalues); //getCrsHome.ashx
+            //            });
+
+        })
+        var tipDialog;
+        function Closedialog() {
+            tipDialog.hide();
+        }
+        setTimeout(Closedialog, 60000 * 10);
+        
+            //15s 后自动关闭！
+       
+       function setTree() {
+           $("#tree3").ligerTree({ checkbox: false });
+       }
+       function linkTab(id,name,url) {
+         
+           window.parent.addtab(id, name,url);
+       }
+    </script>
+</head>
+<body style="padding: 2px; overflow: hidden; background: #65abe7">
+    
+    <div id="main" style="width: 99.2%; margin: 0 auto">
+        <div id="top" position="top">
+        <iframe id="iTop" name="mytop" src="" frameborder="0" width="100%" height="98px">
+        </iframe>
+        </div>
+        <div position="left" title="导航栏" id="left">
+        <div style="width:200px; height:300px; margin:10px; float:left;  border:0px solid #ccc; overflow:auto;  ">
+    <ul id="tree3">
+        <li>
+            <span><font >首页</font></span>
+            <ul>
+                <li><span><font onclick="linkTab('1','车辆信息维护','.html');">车辆信息维护</font></span></li>
+                <li><span><font onclick="linkTab('2','司机维护','.html');">司机维护</font></span></li>
+                <li><span>出差管理</span>
+                     <ul>
+                        <li><span>出差申请表</span></li>
+                     </ul>
+                </li>
+                <li><span>用车预约管理</span>
+                    <ul>
+                        <li><span>用车预约填报</span></li>
+                   </ul>
+                </li>
+                <li><span>车辆返回登记</span>
+                     <ul>
+                        <li><span>返回登记页面</span></li>
+                    </ul>
+                </li>
+                <li><span>统计查询</span>
+                     <ul>
+                        <li><span>司机汇总</span></li>
+                     </ul>
+                </li>
+            </ul>
+        </li> 
+    </ul>
+    </div>
+        </div>
+
+        <div id="showscrollPeople" style="position: absolute; top: 104px; height: 20px; z-index: 5555;
+            text-align: right; display: inline-table;">
+            <div id="marquee" style="float: left; display: inherit;">
+                <marquee direction="left" onmouseover="this.stop()" onmouseout="this.start()"><span  id="marqueeNvalue">回款</span></marquee>
+            </div>
+            <div class="system_date" style="float: left; display: inherit;">
+                <span id="system_date" style="text-align: left; width: 100%;"></span>
+            </div>
+        </div>
+
+
+        <div position="center" id="home" style="width: 100%;">
+            <div tabid="a1" title="首页">
+             <!--   <iframe src="showdesk.htm" frameborder="0" width="100%"></iframe>-->
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+﻿body {
+}
+.red
+    {
+        color:Red;
+        }
+.gray
+     {
+         color:Gray;
+         } 
+.t1
+      {
+          width:160px;
+          }  
+.t2
+       {
+            width:160px;
+            height:22px;
+           }  
+.t3
+         {
+              width:490px;
+              height:60px;
+              overflow:hidden;
+             }    
+table tr td
+      {
+          padding:5px 0;
+	      vertical-align:top;
+	      text-align:left;
+          }
+.b1
+{
+    width:80px;
+    height:25px;
+    padding:0 25px;
+    }          
+          
+          
